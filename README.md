@@ -1,2 +1,2 @@
-# Test-Shared
-Shared repository
+# Test-Private
+Private repository
