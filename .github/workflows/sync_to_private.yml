@@ -15,7 +15,7 @@ jobs:
 
       - name: Clone private repo
         run: |
-          git clone https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/<TARGET_OWNER>/<private-repo>.git /tmp/private-repo
+          git clone https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/iliadna/Test-Private.git /tmp/private-repo
 
       - name: Rsync content to private clone
         run: |
