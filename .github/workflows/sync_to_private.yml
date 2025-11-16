@@ -1,0 +1,48 @@
+name: Sync Shared → Private (Create PR)
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Checkout shared repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone private repo
+        run: |
+          git clone https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/<TARGET_OWNER>/<private-repo>.git /tmp/private-repo
+
+      - name: Rsync content to private clone
+        run: |
+          rsync -av --delete --exclude='.git' --exclude ".github" "$GITHUB_WORKSPACE/" /tmp/private-repo/
+          cd /tmp/private-repo
+          git config user.name "Sync Bot"
+          git config user.email "sync-bot@yourdomain.example"
+          git checkout -b sync-from-shared-$(date +%s)
+          git add .
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "Sync from shared repo at $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push --set-upstream origin HEAD
+          else
+            echo "No changes to create PR"
+            exit 0
+          fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.SYNC_TOKEN }}
+          commit-message: "Sync from shared repo"
+          committer: "Sync Bot <sync-bot@yourdomain.example>"
+          author: "Sync Bot <sync-bot@yourdomain.example>"
+          base: main
+          branch: ${{ steps.push.outputs.ref || 'sync-from-shared' }}
+          title: "Sync from shared repository"
+          body: |
+            This PR was automatically created to sync content from the shared repository.
