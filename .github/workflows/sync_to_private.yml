@@ -23,20 +23,20 @@ jobs:
           cd /tmp/private-repo
           git config user.name "Sync Bot"
           git config user.email "sync-bot@yourdomain.example"
-          BRANCH_NAME="sync-from-shared-$(date +%s)"
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          git checkout -b "$BRANCH_NAME"
           git add .
           # Only commit if there are changes
-          if ! git diff --staged --quiet; then
-            git commit -m "Sync from shared repo at $(date -u +'%Y-%m-%d %H:%M:%S')"
-            git push --set-upstream origin "$BRANCH_NAME"
-          else
+          if git diff --staged --quiet; then
             echo "No changes to create PR"
             exit 0
           fi
+          BRANCH_NAME="sync-from-shared-$(date +%s)"
+          git checkout -b "$BRANCH_NAME"
+          git commit -m "Sync from shared repo at $(date -u +'%Y-%m-%d %H:%M:%S')"
+          git push --set-upstream origin "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
+        if: steps.sync.outputs.branch_name != ''
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.SYNC_TOKEN }}
