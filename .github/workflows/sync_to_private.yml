@@ -37,7 +37,6 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
-        if: steps.sync-content.outputs.has_changes == 'true'
         run: |
           BRANCH_NAME="${{ steps.sync-content.outputs.branch_name }}"
           gh pr create \
