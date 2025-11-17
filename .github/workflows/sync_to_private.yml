@@ -49,6 +49,6 @@ jobs:
           base: main
           branch: ${{ steps.vars.outputs.branch_name }}
           title: "Sync from shared repository"
-          body-file: pr_body.md
+          body-path: pr_body.md
           path: private-repo
           delete-branch: true
