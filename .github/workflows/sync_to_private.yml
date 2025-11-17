@@ -43,6 +43,6 @@ jobs:
             This PR was automatically created to sync content from the shared repository.
             
             - **Sync Source:** ${{ github.repository }}@${{ github.sha }}
-            - **Sync Time:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+            - **Sync Time:** ${{ steps.vars.outputs.sync_time }}
           path: private-repo
           delete-branch: true
