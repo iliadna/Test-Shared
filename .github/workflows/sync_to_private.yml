@@ -37,15 +37,14 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
-        if: steps.sync-content.outputs.branch_name != ''
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.SYNC_TOKEN }}
-          commit-message: "Sync from shared repo"
-          committer: "Sync Bot <sync-bot@yourdomain.example>"
-          author: "Sync Bot <sync-bot@yourdomain.example>"
-          base: main
-          branch: ${{ steps.sync-content.outputs.branch_name }}
-          title: "Sync from shared repository"
-          body: |
-            This PR was automatically created to sync content from the shared repository.
+        if: steps.sync-content.outputs.has_changes == 'true'
+        run: |
+          BRANCH_NAME="${{ steps.sync-content.outputs.branch_name }}"
+          gh pr create \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --title "Sync from shared repository" \
+            --body "This PR was automatically created to sync content from the shared repository." \
+            --repo "iliadna/Test-Private"
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
