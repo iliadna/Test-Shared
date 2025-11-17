@@ -21,7 +21,7 @@ jobs:
       
       - name: Sync content
         run: |
-          rsync -av --delete --exclude='.git' --exclude='.github' "$GITHUB_WORKSPACE/" private-repo/
+          rsync -av --delete --exclude='.git' --exclude='.github' --exclude='private-repo/' "$GITHUB_WORKSPACE/" private-repo/
       
       - name: Generate env vars
         id: vars
