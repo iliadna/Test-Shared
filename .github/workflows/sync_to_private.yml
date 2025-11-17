@@ -18,6 +18,7 @@ jobs:
           git clone https://x-access-token:${{ secrets.SYNC_TOKEN }}@github.com/iliadna/Test-Private.git /tmp/private-repo
 
       - name: Rsync content to private clone
+        id: sync-content
         run: |
           rsync -av --delete --exclude='.git' --exclude ".github" "$GITHUB_WORKSPACE/" /tmp/private-repo/
           cd /tmp/private-repo
@@ -36,7 +37,7 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
-        if: steps.sync.outputs.branch_name != ''
+        if: steps.sync-content.outputs.branch_name != ''
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.SYNC_TOKEN }}
@@ -44,7 +45,7 @@ jobs:
           committer: "Sync Bot <sync-bot@yourdomain.example>"
           author: "Sync Bot <sync-bot@yourdomain.example>"
           base: main
-          branch: ${{ steps.sync.outputs.branch_name }}
+          branch: ${{ steps.sync-content.outputs.branch_name }}
           title: "Sync from shared repository"
           body: |
             This PR was automatically created to sync content from the shared repository.
