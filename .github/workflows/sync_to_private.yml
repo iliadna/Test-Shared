@@ -30,7 +30,7 @@ jobs:
           # Only commit if there are changes
           if ! git diff --staged --quiet; then
             git commit -m "Sync from shared repo at $(date -u +'%Y-%m-%d %H:%M:%S')"
-            git push --set-upstream origin HEAD
+            git push --set-upstream origin "$BRANCH_NAME"
           else
             echo "No changes to create PR"
             exit 0
