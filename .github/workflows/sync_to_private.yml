@@ -23,26 +23,32 @@ jobs:
         run: |
           rsync -av --delete --exclude='.git' --exclude='.github' "$GITHUB_WORKSPACE/" private-repo/
       
-      - name: Generate branch name
-        id: branch-name
+      - name: Generate env vars
+        id: vars
         run: |
           BRANCH_NAME="sync-from-shared-$(date +%s)"
+          SYNC_TIME=$(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          COMMIT_MSG="Sync from shared repo at $SYNC_TIME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          # Create the PR body with proper formatting
+          cat << EOF > pr_body.md
+          This PR was automatically created to sync content from the shared repository.
+          
+          - **Sync Source:** ${{ github.repository }}@${{ github.sha }}
+          - **Sync Time:** $SYNC_TIME
+          EOF
       
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.SYNC_TOKEN }}
-          commit-message: "Sync from shared repo at $(date -u +'%Y-%m-%d %H:%M:%S')"
+          commit-message: ${{ steps.vars.outputs.commit_msg }}
           committer: "Sync Bot <sync-bot@yourdomain.example>"
           author: "Sync Bot <sync-bot@yourdomain.example>"
           base: main
-          branch: ${{ steps.branch-name.outputs.branch_name }}
+          branch: ${{ steps.vars.outputs.branch_name }}
           title: "Sync from shared repository"
-          body: |
-            This PR was automatically created to sync content from the shared repository.
-            
-            - **Sync Source:** ${{ github.repository }}@${{ github.sha }}
-            - **Sync Time:** ${{ steps.vars.outputs.sync_time }}
+          body-file: pr_body.md
           path: private-repo
           delete-branch: true
