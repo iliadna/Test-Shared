@@ -23,6 +23,12 @@ jobs:
         run: |
           rsync -av --delete --exclude='.git' --exclude='.github' "$GITHUB_WORKSPACE/" private-repo/
       
+      - name: Generate branch name
+        id: branch-name
+        run: |
+          BRANCH_NAME="sync-from-shared-$(date +%s)"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+      
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
@@ -31,7 +37,7 @@ jobs:
           committer: "Sync Bot <sync-bot@yourdomain.example>"
           author: "Sync Bot <sync-bot@yourdomain.example>"
           base: main
-          branch: sync-from-shared-$(date +%s)
+          branch: ${{ steps.branch-name.outputs.branch_name }}
           title: "Sync from shared repository"
           body: |
             This PR was automatically created to sync content from the shared repository.
